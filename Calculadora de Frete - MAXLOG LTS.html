@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Frete MAXLOG</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #0000A3;
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header-logo {
+            max-width: 450px;
+            max-height: 180px;
+            width: auto;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background-color: #e6f3ff;
+            border: 2px solid #0000A3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #0000A3;
+        }
+
+        .info-box .icon {
+            color: #0000A3;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .form-group label {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tooltip {
+            width: 20px;
+            height: 20px;
+            background-color: #0000A3;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: help;
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #333;
+            z-index: 1000;
+        }
+
+        .form-control {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0000A3;
+            box-shadow: 0 0 0 3px rgba(0, 0, 163, 0.1);
+        }
+
+        .form-control:hover {
+            border-color: #9ca3af;
+        }
+
+        .cargo-type {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cargo-option {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .cargo-option:hover {
+            border-color: #0000A3;
+            background: #f8fafc;
+        }
+
+        .cargo-option.selected {
+            border-color: #0000A3;
+            background-color: #e6f3ff;
+            color: #0000A3;
+            font-weight: 600;
+        }
+
+        .cargo-option .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .peso-info {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background-color: #0000A3;
+            color: white;
+            flex: 2;
+        }
+
+        .btn-primary:hover {
+            background-color: #000080;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 163, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background-color: #0000A3;
+            color: white;
+            margin-top: 15px;
+            padding: 12px 25px;
+            font-size: 0.9rem;
+            border: 2px solid #0000A3;
+        }
+
+        .btn-info:hover {
+            background-color: #000080;
+            border-color: #000080;
+            transform: translateY(-1px);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animação dos números tipo cassino */
+        @keyframes numberRoll {
+            0% { transform: translateY(-20px); opacity: 0; }
+            50% { transform: translateY(-5px); opacity: 0.7; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .number-animation {
+            animation: numberRoll 0.3s ease-out;
+            font-family: 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .counting {
+            font-family: 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .result-header h3 {
+            color: #16a34a;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #0000A3;
+        }
+
+        .result-item .label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .result-item .value {
+            color: #1f2937;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .total-box {
+            background-color: #0000A3;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .total-box .total-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .calculation-details {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .calculation-details h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .calc-step {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .calc-step:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #0000A3;
+        }
+
+        .timeline-container {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .timeline-container h4 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            margin: 30px 0;
+            padding: 0 30px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            right: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, #f59e0b 0%, #22c55e 100%);
+            border-radius: 2px;
+            transform: translateY(-50%);
+        }
+
+        .timeline-points {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-point {
+            background: white;
+            border: 4px solid #f59e0b;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .timeline-point.end {
+            border-color: #22c55e;
+            background: #22c55e;
+        }
+
+        .timeline-label {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .timeline-point.end .timeline-label {
+            background: #22c55e;
+            color: white;
+        }
+
+        .timeline-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .timeline-info-item {
+            text-align: center;
+        }
+
+        .timeline-info-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .timeline-info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .chart-container {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .chart-container h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .lotacao-options {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .lotacao-options.show {
+            display: grid;
+        }
+
+        .vehicle-option {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .vehicle-option:hover {
+            border-color: #0000A3;
+            background-color: #f8fafc;
+        }
+
+        .vehicle-option.selected {
+            border-color: #0000A3;
+            background-color: #e6f3ff;
+            color: #0000A3;
+        }
+
+        .vehicle-option .vehicle-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .vehicle-option .vehicle-info {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            border-bottom: 2px solid #0000A3;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            color: #0000A3;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #0000A3;
+        }
+
+        .methodology-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #0000A3;
+        }
+
+        .methodology-section h3 {
+            color: #0000A3;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .methodology-section p, .methodology-section li {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .methodology-section ul {
+            padding-left: 20px;
+        }
+
+        .formula-box {
+            background-color: #e6f3ff;
+            border: 1px solid #0000A3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #0000A3;
+        }
+
+        .warning-box {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #92400e;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .warning-box ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .warning-box li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .cargo-type {
+                flex-direction: column;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-logo {
+                max-width: 360px;
+                max-height: 150px;
+                margin-bottom: 15px;
+            }
+
+            .tooltip:hover::after {
+                white-space: normal;
+                width: 200px;
+            }
+
+            .modal-content {
+                margin: 10px;
+                padding: 20px;
+                max-height: 90vh;
+            }
+
+            .timeline-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .timeline-wrapper {
+                padding: 0 20px;
+            }
+
+            .timeline-line {
+                left: 30px;
+                right: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-logo {
+                max-width: 320px;
+                max-height: 130px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .timeline-wrapper {
+                padding: 0 15px;
+            }
+
+            .timeline-line {
+                left: 25px;
+                right: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://i.ibb.co/JRyk30LH/logousimax.png" alt="Logo Usimax" class="header-logo">
+            <h1>CALCULADORA DE FRETE</h1>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <span class="icon">💡</span>
+                <strong>Como usar:</strong>
+                Preencha os dados da carga, selecione origem e destino. O sistema calcula automaticamente o frete com todos os custos incluídos!
+            </div>
+
+            <form id="freteForm">
+                <div class="form-group">
+                    <label>
+                        Tipo de Carga
+                        <span class="tooltip" data-tooltip="Carga fracionada: até 32 toneladas | Lotação: veículo completo">?</span>
+                    </label>
+                    <div class="cargo-type">
+                        <div class="cargo-option selected" data-type="fracionada">
+                            <span class="icon">📦</span>
+                            Carga Fracionada
+                        </div>
+                        <div class="cargo-option" data-type="lotacao">
+                            <span class="icon">🚚</span>
+                            Carga Lotação
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lotacao-options" id="lotacaoOptions">
+                    <div class="vehicle-option selected" data-vehicle="carreta32">
+                        <div class="vehicle-name">Carreta 32 ton</div>
+                        <div class="vehicle-info">28 paletes</div>
+                    </div>
+                    <div class="vehicle-option" data-vehicle="carreta25">
+                        <div class="vehicle-name">Carreta 25 ton</div>
+                        <div class="vehicle-info">28 ou 30 paletes</div>
+                    </div>
+                    <div class="vehicle-option" data-vehicle="truck13">
+                        <div class="vehicle-name">Truck 13 ton</div>
+                        <div class="vehicle-info">16 paletes</div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group peso-container">
+                        <label>
+                            Peso da Carga (kg)
+                            <span class="tooltip" data-tooltip="Peso total da carga. Até 100kg paga só frete base. Acima de 100kg paga base + excedente por kg">?</span>
+                        </label>
+                        <input type="number" class="form-control" id="pesoCarga" placeholder="150" min="1" value="150" step="0.1">
+                        <div class="peso-info">Digite o peso total da sua carga em quilos</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            💰 Valor da Nota Fiscal (R$)
+                            <span class="tooltip" data-tooltip="Valor usado para calcular GRISS (0,2%) e ADV (0,3%). Obrigatório por lei">?</span>
+                        </label>
+                        <input type="number" class="form-control" id="valorNota" placeholder="5000" step="0.01" min="0" value="5000">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            📍 Origem
+                            <span class="tooltip" data-tooltip="Local de coleta da mercadoria">?</span>
+                        </label>
+                        <select class="form-control" id="origem">
+                            <option value="ITAJAÍ/SC">ITAJAÍ/SC</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            🎯 Destino
+                            <span class="tooltip" data-tooltip="Local de entrega da mercadoria. Prazo varia conforme destino">?</span>
+                        </label>
+                        <select class="form-control" id="destino">
+                            <option value="">Selecione o destino</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button type="submit" class="btn btn-primary">🧮 Calcular Frete</button>
+                    <button type="button" class="btn btn-secondary" onclick="limparFormulario()">🗑️ Limpar</button>
+                </div>
+            </form>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-header">
+                    <h3>💎 Resultado da Cotação</h3>
+                    <p id="rotaInfo"></p>
+                </div>
+                <div class="result-grid" id="resultGrid">
+                </div>
+                <div class="calculation-details" id="calculationDetails">
+                    <h4>📊 Detalhamento do Cálculo</h4>
+                    <div id="calcSteps"></div>
+                </div>
+                
+                <div class="timeline-container" id="timelineContainer" style="display: none;">
+                    <h4>⏱️ Timeline de Entrega 
+                        <span class="tooltip" data-tooltip="Prazos calculados apenas em dias úteis (segunda a sexta), excluindo fins de semana">?</span>
+                    </h4>
+                    <div class="timeline-wrapper">
+                        <div class="timeline-line"></div>
+                        <div class="timeline-points">
+                            <div class="timeline-point">
+                                <div class="timeline-label">Coleta D+1</div>
+                            </div>
+                            <div class="timeline-point end" id="deliveryPoint">
+                                <div class="timeline-label" id="deliveryLabel">Entrega</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-info">
+                        <div class="timeline-info-item">
+                            <div class="timeline-info-label">Coleta</div>
+                            <div class="timeline-info-value" id="timelineColeta">Próximo dia útil</div>
+                        </div>
+                        <div class="timeline-info-item">
+                            <div class="timeline-info-label">Prazo</div>
+                            <div class="timeline-info-value" id="timelinePrazo">-</div>
+                        </div>
+                        <div class="timeline-info-item">
+                            <div class="timeline-info-label">Entrega estimada</div>
+                            <div class="timeline-info-value" id="timelineEntrega">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container" id="chartContainer" style="display: none;">
+                    <h4>💰 Breakdown de Custos</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="methodologyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🧮 Como Fiz o Cálculo?</h2>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            
+            <div class="methodology-section">
+                <h3>📋 Tabela de Referência (MAXLOG)</h3>
+                <p>Todos os cálculos são baseados na <strong>tabela oficial da MAXLOG Transportes</strong> fornecida em agosto de 2025. Os valores são exatos conforme o documento.</p>
+            </div>
+
+            <div id="fracionadaMethodology" class="methodology-section" style="display: none;">
+            </div>
+
+            <div id="lotacaoMethodology" class="methodology-section" style="display: none;">
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Importante - Por que pode dar diferente?</h4>
+                <p><strong>Este cálculo segue EXATAMENTE a tabela da transportadora</strong>, mas podem haver diferenças na cotação real por:</p>
+                <ul>
+                    <li><strong>Descontos comerciais:</strong> Clientes com volume podem ter até 10% de desconto</li>
+                    <li><strong>Negociações específicas:</strong> Valores podem ser ajustados caso a caso</li>
+                    <li><strong>ICMS:</strong> Imposto estadual (12% a 18%) NÃO está incluído aqui</li>
+                    <li><strong>Destinos específicos:</strong> Algumas cidades podem ter tarifas diferenciadas</li>
+                    <li><strong>Cubagem:</strong> Cargas muito volumosas (regra 300kg/m³) podem alterar o cálculo</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>📄 Referências</h3>
+                <p>• <strong>Documento:</strong> Tabela de Preços MAXLOG Transportes</p>
+                <p>• <strong>Data:</strong> Agosto 2025</p>
+                <p>• <strong>Cliente:</strong> USIQUÍMICA DO BRASIL LTDA</p>
+                <p>• <strong>Origem:</strong> Itajaí/SC</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var tabelaFretes = {
+            fracionadas: [
+                { prazo: "1 a 3 dias úteis", origem: "ITAJAÍ/SC", destino: "SC LITORAL NORTE", precoAte100: 65.90, excedente: 0.55, pedagio: 3.50, adv: 0.003 },
+                { prazo: "3 a 5 dias úteis", origem: "ITAJAÍ/SC", destino: "SC LITORAL SUL", precoAte100: 85.90, excedente: 0.75, pedagio: 3.50, adv: 0.003 },
+                { prazo: "4 a 7 dias úteis", origem: "ITAJAÍ/SC", destino: "SC INTERIOR", precoAte100: 125.90, excedente: 1.05, pedagio: 3.50, adv: 0.003 },
+                { prazo: "2 a 3 dias úteis", origem: "ITAJAÍ/SC", destino: "RS CAPITAL", precoAte100: 95.90, excedente: 0.75, pedagio: 3.50, adv: 0.003 },
+                { prazo: "5 a 7 dias úteis", origem: "ITAJAÍ/SC", destino: "RS SERRA / CAXIAS DO SUL", precoAte100: 135.90, excedente: 0.90, pedagio: 3.50, adv: 0.003 },
+                { prazo: "7 a 9 dias úteis", origem: "ITAJAÍ/SC", destino: "RS INTERIOR", precoAte100: 155.90, excedente: 1.25, pedagio: 3.50, adv: 0.003 },
+                { prazo: "1 a 3 dias úteis", origem: "ITAJAÍ/SC", destino: "PR CAPITAL", precoAte100: 75.00, excedente: 0.65, pedagio: 3.50, adv: 0.003 },
+                { prazo: "7 a 9 dias úteis", origem: "ITAJAÍ/SC", destino: "PR INTERIOR", precoAte100: 155.90, excedente: 1.25, pedagio: 3.50, adv: 0.003 },
+                { prazo: "2 a 3 dias úteis", origem: "ITAJAÍ/SC", destino: "SP CAPITAL", precoAte100: 95.90, excedente: 0.75, pedagio: 3.50, adv: 0.003 },
+                { prazo: "2 a 4 dias úteis", origem: "ITAJAÍ/SC", destino: "SP INTERIOR 1 (CAMPINAS)", precoAte100: 135.90, excedente: 1.05, pedagio: 3.50, adv: 0.003 },
+                { prazo: "3 a 5 dias úteis", origem: "ITAJAÍ/SC", destino: "MG CAPITAL", precoAte100: 145.90, excedente: 1.15, pedagio: 3.50, adv: 0.003 }
+            ],
+            lotacao: [
+                { origem_destino: "Itajaí/SC x SP – Capital", carreta32: 6980, carreta25: 5990, truck13: 3900, griss: 0.001, adv: 0.0015, prazo: "24 horas" },
+                { origem_destino: "Itajaí/SC x SP – Campinas / Itu", carreta32: 7480, carreta25: 6500, truck13: 4300, griss: 0.001, adv: 0.0015, prazo: "24 horas" }
+            ]
+        };
+
+        var ultimoCalculoRealizado = {};
+
+        var config = {
+            griss: 0.002,
+            despacho: 25.00,
+            reentrega: 0.50,
+            devolucao: 1.00,
+            paletizacao: 55.00,
+            estadia: 10.50,
+            tde: 250.00,
+            pedagogioPorFracao: 3.50
+        };
+
+        // Função para animação dos números tipo cassino
+        function animateNumber(element, targetValue, duration) {
+            if (!duration) duration = 1200;
+            
+            var startValue = 0;
+            var startTime = Date.now();
+            var originalText = element.textContent;
+            
+            element.classList.add('counting');
+            
+            function updateValue() {
+                var elapsed = Date.now() - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                
+                // Easing para suavizar a animação
+                var easeOut = 1 - Math.pow(1 - progress, 3);
+                var currentValue = startValue + (targetValue * easeOut);
+                
+                // Formatação baseada no tipo
+                if (originalText.indexOf('/kg') > -1) {
+                    element.textContent = 'R$ ' + currentValue.toFixed(4) + '/kg';
+                } else if (originalText.indexOf('/ton') > -1) {
+                    element.textContent = 'R$ ' + currentValue.toFixed(2) + '/ton';
+                } else if (originalText.indexOf('R$') > -1) {
+                    element.textContent = 'R$ ' + currentValue.toFixed(2);
+                } else {
+                    element.textContent = currentValue.toFixed(2);
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateValue);
+                } else {
+                    // Restaurar valor original e adicionar classe de animação
+                    element.textContent = originalText;
+                    element.classList.remove('counting');
+                    element.classList.add('number-animation');
+                    setTimeout(function() {
+                        element.classList.remove('number-animation');
+                    }, 300);
+                }
+            }
+            
+            requestAnimationFrame(updateValue);
+        }
+
+        function adicionarDiasUteis(dataInicial, diasUteis) {
+            var data = new Date(dataInicial);
+            var diasAdicionados = 0;
+
+            while (diasAdicionados < diasUteis) {
+                data.setDate(data.getDate() + 1);
+                var diaSemana = data.getDay();
+                
+                if (diaSemana !== 0 && diaSemana !== 6) {
+                    diasAdicionados++;
+                }
+            }
+
+            return data;
+        }
+
+        function proximoDiaUtil(data) {
+            var novaData = new Date(data);
+            var diaSemana = novaData.getDay();
+            
+            if (diaSemana === 6) {
+                novaData.setDate(novaData.getDate() + 2);
+            } else if (diaSemana === 0) {
+                novaData.setDate(novaData.getDate() + 1);
+            } else {
+                return adicionarDiasUteis(novaData, 1);
+            }
+            
+            return novaData;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDestinos();
+            configurarEventos();
+        });
+
+        function carregarDestinos() {
+            var origemSelect = document.getElementById('origem');
+            var destinoSelect = document.getElementById('destino');
+            var origem = origemSelect.value;
+
+            destinoSelect.innerHTML = '<option value="">Selecione o destino</option>';
+
+            if (origem) {
+                var destinos = tabelaFretes.fracionadas
+                    .filter(function(item) { return item.origem === origem; })
+                    .map(function(item) { return item.destino; });
+
+                destinos.forEach(function(destino) {
+                    var option = document.createElement('option');
+                    option.value = destino;
+                    option.textContent = destino;
+                    destinoSelect.appendChild(option);
+                });
+            }
+        }
+
+        function configurarEventos() {
+            document.querySelectorAll('.cargo-option').forEach(function(option) {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.cargo-option').forEach(function(opt) {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    
+                    var tipo = this.dataset.type;
+                    var pesoContainer = document.querySelector('.peso-container');
+                    var lotacaoOptions = document.getElementById('lotacaoOptions');
+                    
+                    if (tipo === 'lotacao') {
+                        pesoContainer.style.display = 'none';
+                        lotacaoOptions.classList.add('show');
+                    } else {
+                        pesoContainer.style.display = 'block';
+                        lotacaoOptions.classList.remove('show');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.vehicle-option').forEach(function(option) {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.vehicle-option').forEach(function(opt) {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+
+            document.getElementById('origem').addEventListener('change', carregarDestinos);
+
+            document.getElementById('freteForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                calcularFrete();
+            });
+        }
+
+        function calcularFrete() {
+            var tipoSelecionado = document.querySelector('.cargo-option.selected').dataset.type;
+            var origem = document.getElementById('origem').value;
+            var destino = document.getElementById('destino').value;
+            var valorNota = parseFloat(document.getElementById('valorNota').value) || 0;
+
+            if (!destino) {
+                alert('Por favor, selecione o destino!');
+                return;
+            }
+
+            if (tipoSelecionado === 'fracionada') {
+                calcularFreteFracionado(origem, destino, valorNota);
+            } else {
+                calcularFreteLotacao(origem, destino, valorNota);
+            }
+        }
+
+        function calcularFreteFracionado(origem, destino, valorNota) {
+            var pesoCarga = parseFloat(document.getElementById('pesoCarga').value) || 1;
+
+            var rota = tabelaFretes.fracionadas.find(function(item) {
+                return item.origem === origem && item.destino === destino;
+            });
+
+            if (!rota) {
+                alert('Rota não encontrada na tabela de preços!');
+                return;
+            }
+
+            var freteBase = rota.precoAte100;
+            var pesoExcedente = 0;
+            var valorExcedente = 0;
+
+            if (pesoCarga > 100) {
+                pesoExcedente = pesoCarga - 100;
+                valorExcedente = pesoExcedente * rota.excedente;
+            }
+
+            var freteTotal = freteBase + valorExcedente;
+
+            var fracoesPedagio = Math.ceil(pesoCarga / 100);
+            var pedagio = fracoesPedagio * config.pedagogioPorFracao;
+            var griss = valorNota * config.griss;
+            var adv = valorNota * rota.adv;
+
+            var totalGeral = freteTotal + pedagio + griss + adv + config.despacho;
+
+            var pesoToneladas = pesoCarga / 1000;
+            var valorOmega = totalGeral / pesoToneladas;
+
+            var precoKg = totalGeral / pesoCarga;
+            var detalhes = [
+                { desc: 'Frete base', valor: freteBase, info: 'R$ ' + (freteBase/100).toFixed(4) + '/kg' }
+            ];
+
+            if (pesoExcedente > 0) {
+                detalhes.push({ 
+                    desc: 'Excedente', 
+                    valor: valorExcedente, 
+                    info: 'R$ ' + rota.excedente.toFixed(4) + '/kg' 
+                });
+            }
+
+            detalhes.push(
+                { desc: 'Pedágio', valor: pedagio, info: 'R$ ' + (pedagio/pesoCarga).toFixed(4) + '/kg' },
+                { desc: 'GRISS', valor: griss, info: 'R$ ' + (griss/pesoCarga).toFixed(4) + '/kg' },
+                { desc: 'ADV', valor: adv, info: 'R$ ' + (adv/pesoCarga).toFixed(4) + '/kg' },
+                { desc: 'Despacho', valor: config.despacho, info: 'R$ ' + (config.despacho/pesoCarga).toFixed(4) + '/kg' }
+            );
+
+            exibirResultado({
+                rota: origem + ' → ' + destino,
+                prazo: rota.prazo,
+                peso: pesoCarga + ' kg',
+                precoKg: totalGeral / pesoCarga,
+                valorOmega: valorOmega,
+                freteBase: freteBase,
+                pesoExcedente: pesoExcedente,
+                valorExcedente: valorExcedente,
+                freteTotal: freteTotal,
+                pedagio: pedagio,
+                griss: griss,
+                adv: adv,
+                despacho: config.despacho,
+                totalGeral: totalGeral,
+                valorNota: valorNota,
+                detalhes: detalhes,
+                tipoCalculo: 'fracionada'
+            });
+        }
+
+        function calcularFreteLotacao(origem, destino, valorNota) {
+            var veiculoSelecionado = document.querySelector('.vehicle-option.selected').dataset.vehicle;
+            
+            var rota = tabelaFretes.lotacao.find(function(item) {
+                return item.origem_destino.indexOf('SP') > -1;
+            });
+
+            if (!rota) {
+                alert('Rota de lotação não encontrada na tabela de preços!');
+                return;
+            }
+
+            var precoVeiculo = rota[veiculoSelecionado];
+            var griss = valorNota * rota.griss;
+            var adv = valorNota * rota.adv;
+            
+            var totalGeral = precoVeiculo + griss + adv;
+
+            var pesoEstimado = {
+                carreta32: 32000,
+                carreta25: 25000,
+                truck13: 13000
+            };
+
+            var peso = pesoEstimado[veiculoSelecionado];
+            var pesoToneladas = peso / 1000;
+            
+            var valorOmega = totalGeral / pesoToneladas;
+
+            var detalhes = [
+                { desc: 'Frete ' + veiculoSelecionado.toUpperCase(), valor: precoVeiculo, info: 'R$ ' + (precoVeiculo/peso).toFixed(4) + '/kg' },
+                { desc: 'GRISS', valor: griss, info: 'R$ ' + (griss/peso).toFixed(6) + '/kg' },
+                { desc: 'ADV', valor: adv, info: 'R$ ' + (adv/peso).toFixed(6) + '/kg' }
+            ];
+
+            exibirResultado({
+                rota: origem + ' → ' + destino,
+                prazo: rota.prazo,
+                peso: 'Lotação completa (' + (peso/1000) + 't)',
+                precoKg: totalGeral / peso,
+                valorOmega: valorOmega,
+                totalGeral: totalGeral,
+                detalhes: detalhes,
+                valorNota: valorNota,
+                tipoCalculo: 'lotacao'
+            });
+        }
+
+        function exibirResultado(dados) {
+            ultimoCalculoRealizado = dados;
+            
+            var container = document.getElementById('resultContainer');
+            var grid = document.getElementById('resultGrid');
+            var rotaInfo = document.getElementById('rotaInfo');
+            var calcSteps = document.getElementById('calcSteps');
+
+            rotaInfo.textContent = dados.rota + ' | ' + dados.prazo;
+
+            var resultHTML = '';
+            resultHTML += '<div class="result-item">';
+            resultHTML += '<div class="label">Peso da Carga</div>';
+            resultHTML += '<div class="value">' + dados.peso + '</div>';
+            resultHTML += '</div>';
+            
+            resultHTML += '<div class="result-item">';
+            resultHTML += '<div class="label">Preço por Quilo</div>';
+            resultHTML += '<div class="value animatable">R$ ' + (dados.precoKg ? dados.precoKg.toFixed(4) : '0,0000') + '/kg</div>';
+            resultHTML += '</div>';
+            
+            resultHTML += '<div class="result-item">';
+            resultHTML += '<div class="label">Valor da Nota Fiscal</div>';
+            resultHTML += '<div class="value">R$ ' + (dados.valorNota ? dados.valorNota.toFixed(2) : '0,00') + '</div>';
+            resultHTML += '</div>';
+            
+            resultHTML += '<div class="result-item">';
+            resultHTML += '<div class="label">Prazo de Entrega</div>';
+            resultHTML += '<div class="value">' + dados.prazo + '</div>';
+            resultHTML += '</div>';
+            
+            resultHTML += '<div class="result-item" style="background: linear-gradient(135deg, #cc21cc, #6f0095); border-left: 4px solid #c920ca;">';
+            resultHTML += '<div class="label" style="color: white; font-weight: bold;">⚙️ Valor do Frete Ômega</div>';
+            resultHTML += '<div class="value animatable" style="color: white; font-size: 1.3rem;">R$ ' + (dados.valorOmega ? dados.valorOmega.toFixed(2) : '0,00') + '/ton</div>';
+            resultHTML += '</div>';
+
+            if (dados.freteBase !== undefined) {
+                resultHTML += '<div class="result-item">';
+                resultHTML += '<div class="label">Frete Base</div>';
+                resultHTML += '<div class="value animatable">R$ ' + dados.freteBase.toFixed(2) + '</div>';
+                resultHTML += '</div>';
+            }
+
+            resultHTML += '<div class="total-box">';
+            resultHTML += '<div class="total-value animatable">R$ ' + dados.totalGeral.toFixed(2) + '</div>';
+            resultHTML += '<div>TOTAL DO FRETE (SEM ICMS)</div>';
+            resultHTML += '<div style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px;">';
+            resultHTML += '*ICMS será adicionado conforme legislação estadual';
+            resultHTML += '</div>';
+            resultHTML += '</div>';
+
+            grid.innerHTML = resultHTML;
+
+            var stepsHTML = '';
+            dados.detalhes.forEach(function(item) {
+                var infoKg = item.info ? ' <span style="color: #6b7280; font-size: 0.85em;">(' + item.info + ')</span>' : '';
+                stepsHTML += '<div class="calc-step">';
+                stepsHTML += '<span>' + item.desc + infoKg + '</span>';
+                stepsHTML += '<span class="animatable">R$ ' + item.valor.toFixed(2) + '</span>';
+                stepsHTML += '</div>';
+            });
+            
+            stepsHTML += '<div class="calc-step">';
+            stepsHTML += '<span><strong>TOTAL GERAL <span style="color: #6b7280; font-weight: normal;">(R$ ' + (dados.totalGeral ? (dados.totalGeral / parseFloat(dados.peso)).toFixed(4) : '0,0000') + '/kg)</span></strong></span>';
+            stepsHTML += '<span class="animatable"><strong>R$ ' + dados.totalGeral.toFixed(2) + '</strong></span>';
+            stepsHTML += '</div>';
+            stepsHTML += '<div class="calc-step" style="background: #fef3c7; padding: 10px; border-radius: 6px; border: 1px solid #fbbf24;">';
+            stepsHTML += '<span><strong>⚙️ VALOR FRETE ÔMEGA <span style="color: #92400e; font-weight: normal;">(para inserir no sistema)</span></strong></span>';
+            stepsHTML += '<span class="animatable"><strong style="color: #d97706;">R$ ' + (dados.valorOmega ? dados.valorOmega.toFixed(2) : '0,00') + '/ton</strong></span>';
+            stepsHTML += '</div>';
+
+            calcSteps.innerHTML = stepsHTML;
+
+            var buttonContainer = calcSteps.parentNode.querySelector('.methodology-button');
+            if (!buttonContainer) {
+                buttonContainer = document.createElement('div');
+                buttonContainer.className = 'methodology-button';
+                buttonContainer.style.textAlign = 'center';
+                buttonContainer.innerHTML = '<button class="btn btn-info" onclick="mostrarMetodologia(\'' + (dados.tipoCalculo || 'fracionada') + '\')">🤔 Como fiz o cálculo?</button>';
+                calcSteps.parentNode.appendChild(buttonContainer);
+            }
+
+            var observacoes = document.getElementById('observacoes') || document.createElement('div');
+            observacoes.id = 'observacoes';
+            observacoes.className = 'calculation-details';
+            
+            var observacoesHTML = '';
+            observacoesHTML += '<h4 style="color: #dc2626;">Importante - Possíveis Diferenças na Cotação</h4>';
+            observacoesHTML += '<div style="font-size: 0.9rem; color: #4b5563; line-height: 1.6;">';
+            observacoesHTML += '<p><strong>Este valor pode divergir da cotação final por:</strong></p>';
+            observacoesHTML += '<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 12px; margin: 10px 0;">';
+            observacoesHTML += '<strong style="color: #92400e;">Diferenças Comuns Observadas:</strong>';
+            observacoesHTML += '<ul style="margin: 8px 0; padding-left: 20px; color: #92400e;">';
+            observacoesHTML += '<li><strong>GRISS/ADV:</strong> Podem ser calculados sobre valor menor (só frete vs. valor NF)</li>';
+            observacoesHTML += '<li><strong>Desconto comercial:</strong> Transportadoras aplicam até 10% de desconto</li>';
+            observacoesHTML += '<li><strong>Destino específico:</strong> Americana pode ter tabela diferente de Campinas</li>';
+            observacoesHTML += '<li><strong>Negociação:</strong> Valores para clientes regulares podem ser menores</li>';
+            observacoesHTML += '</ul>';
+            observacoesHTML += '</div>';
+            observacoesHTML += '<ul style="margin: 10px 0; padding-left: 20px;">';
+            observacoesHTML += '<li><strong>ICMS:</strong> Imposto estadual (12% a 18%) conforme legislação - NÃO INCLUÍDO</li>';
+            observacoesHTML += '<li><strong>Cubagem:</strong> Se carga volumosa, cobra-se por volume (300kg/m³)</li>';
+            observacoesHTML += '<li><strong>Paletização:</strong> R$ 55,00 por palete (se necessário)</li>';
+            observacoesHTML += '<li><strong>TDE:</strong> R$ 250,00 (taxa de entrega em casos específicos)</li>';
+            observacoesHTML += '<li><strong>Taxas regionais:</strong> Podem variar por estado/cidade</li>';
+            observacoesHTML += '</ul>';
+            observacoesHTML += '<p style="color: #dc2626; font-weight: 600;">Sempre confirme o detalhamento com a transportadora!</p>';
+            observacoesHTML += '</div>';
+            
+            observacoes.innerHTML = observacoesHTML;
+            
+            if (!document.getElementById('observacoes')) {
+                container.appendChild(observacoes);
+            }
+
+            container.classList.add('show');
+            container.scrollIntoView({ behavior: 'smooth' });
+            
+            criarTimelineVisual(dados);
+            criarBreakdownCustos(dados);
+
+            // Iniciar animações dos números após exibir o resultado
+            setTimeout(function() {
+                // Animar valor total principal (mais dramático)
+                var totalElement = document.querySelector('.total-value.animatable');
+                if (totalElement) {
+                    setTimeout(function() {
+                        animateNumber(totalElement, dados.totalGeral, 1500);
+                    }, 200);
+                }
+
+                // Animar outros valores com delay escalonado
+                var animatableElements = document.querySelectorAll('.result-item .value.animatable');
+                animatableElements.forEach(function(element, index) {
+                    setTimeout(function() {
+                        var text = element.textContent;
+                        var match = text.match(/R\$ ([\d,\.]+)/);
+                        if (match) {
+                            var value = parseFloat(match[1].replace(',', '.'));
+                            animateNumber(element, value, 1000);
+                        }
+                    }, 400 + (index * 150));
+                });
+
+                // Animar valores do detalhamento
+                var calcElements = document.querySelectorAll('.calc-step .animatable');
+                calcElements.forEach(function(element, index) {
+                    setTimeout(function() {
+                        var text = element.textContent;
+                        var match = text.match(/R\$ ([\d,\.]+)/);
+                        if (match) {
+                            var value = parseFloat(match[1].replace(',', '.'));
+                            animateNumber(element, value, 800);
+                        }
+                    }, 800 + (index * 100));
+                });
+            }, 300);
+        }
+
+        function criarTimelineVisual(dados) {
+            var timelineContainer = document.getElementById('timelineContainer');
+            timelineContainer.style.display = 'block';
+            
+            var prazoText = dados.prazo;
+            var timelinePrazo = document.getElementById('timelinePrazo');
+            var timelineEntrega = document.getElementById('timelineEntrega');
+            var timelineColeta = document.getElementById('timelineColeta');
+            
+            timelinePrazo.textContent = prazoText;
+            
+            var diasMinimo = 1;
+            var diasMaximo = 3;
+            
+            var matches = prazoText.match(/(\d+)\s*a\s*(\d+)\s*dias?/);
+            if (matches) {
+                diasMinimo = parseInt(matches[1]);
+                diasMaximo = parseInt(matches[2]);
+            } else if (prazoText.indexOf('24 horas') > -1) {
+                diasMinimo = 1;
+                diasMaximo = 1;
+            }
+            
+            var hoje = new Date();
+            
+            var dataColeta = proximoDiaUtil(hoje);
+            
+            var entregaMinima = adicionarDiasUteis(dataColeta, diasMinimo);
+            var entregaMaxima = adicionarDiasUteis(dataColeta, diasMaximo);
+            
+            function formatarData(data) {
+                return data.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: '2-digit' 
+                });
+            }
+
+            function formatarDataCompleta(data) {
+                var dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                return dias[data.getDay()] + ' (' + formatarData(data) + ')';
+            }
+            
+            timelineColeta.textContent = formatarDataCompleta(dataColeta);
+            
+            if (diasMinimo === diasMaximo) {
+                timelineEntrega.textContent = formatarDataCompleta(entregaMinima);
+            } else {
+                timelineEntrega.textContent = formatarDataCompleta(entregaMinima) + ' a ' + formatarDataCompleta(entregaMaxima);
+            }
+            
+            var deliveryLabel = document.getElementById('deliveryLabel');
+            var diasEntregaMinima = 1 + diasMinimo;
+            var diasEntregaMaxima = 1 + diasMaximo;
+            
+            if (diasMinimo === diasMaximo) {
+                deliveryLabel.textContent = 'D+' + diasEntregaMinima;
+            } else {
+                deliveryLabel.textContent = 'D+' + diasEntregaMinima + ' a D+' + diasEntregaMaxima;
+            }
+        }
+
+        function criarBreakdownCustos(dados) {
+            var chartContainer = document.getElementById('chartContainer');
+            chartContainer.style.display = 'block';
+            
+            var ctx = document.getElementById('costChart').getContext('2d');
+            
+            var labels = [];
+            var values = [];
+            var colors = ['#0000A3', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#10b981', '#6b7280'];
+            
+            dados.detalhes.forEach(function(item, index) {
+                if (item.valor > 0) {
+                    labels.push(item.desc.split('(')[0].trim());
+                    values.push(item.valor);
+                }
+            });
+            
+            if (window.costChartInstance) {
+                window.costChartInstance.destroy();
+            }
+            
+            window.costChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label;
+                                    var value = context.parsed;
+                                    var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                    var percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': R$ ' + value.toFixed(2) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '50%'
+                }
+            });
+        }
+
+        function limparFormulario() {
+            document.getElementById('freteForm').reset();
+            document.getElementById('pesoCarga').value = '150';
+            document.getElementById('valorNota').value = '5000';
+            document.getElementById('resultContainer').classList.remove('show');
+            
+            document.querySelectorAll('.cargo-option').forEach(function(opt) {
+                opt.classList.remove('selected');
+            });
+            document.querySelector('.cargo-option[data-type="fracionada"]').classList.add('selected');
+            
+            document.querySelectorAll('.vehicle-option').forEach(function(opt) {
+                opt.classList.remove('selected');
+            });
+            document.querySelector('.vehicle-option[data-vehicle="carreta32"]').classList.add('selected');
+            
+            document.getElementById('lotacaoOptions').classList.remove('show');
+            document.querySelector('.peso-container').style.display = 'block';
+            
+            document.getElementById('timelineContainer').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'none';
+            
+            carregarDestinos();
+        }
+
+        function mostrarMetodologia(tipoCalculo) {
+            var modal = document.getElementById('methodologyModal');
+            var fracionadaMethod = document.getElementById('fracionadaMethodology');
+            var lotacaoMethod = document.getElementById('lotacaoMethodology');
+
+            fracionadaMethod.style.display = 'none';
+            lotacaoMethod.style.display = 'none';
+
+            if (tipoCalculo === 'fracionada') {
+                atualizarMetodologiaFracionada(ultimoCalculoRealizado);
+                fracionadaMethod.style.display = 'block';
+            } else {
+                atualizarMetodologiaLotacao(ultimoCalculoRealizado);
+                lotacaoMethod.style.display = 'block';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function atualizarMetodologiaFracionada(dados) {
+            var peso = parseFloat(dados.peso ? dados.peso.toString().replace(' kg', '') : 0) || 0;
+            var valorNota = dados.valorNota || 0;
+            var rota = dados.rota || '';
+            var freteBase = dados.freteBase || 0;
+            var pesoExcedente = dados.pesoExcedente || 0;
+            var valorExcedente = dados.valorExcedente || 0;
+            var pedagio = dados.pedagio || 0;
+            var griss = dados.griss || 0;
+            var adv = dados.adv || 0;
+            var despacho = dados.despacho || 0;
+            var totalGeral = dados.totalGeral || 0;
+            var valorOmega = dados.valorOmega || 0;
+
+            var fracoesPedagio = Math.ceil(peso / 100);
+            var precoKg = peso > 0 ? (totalGeral / peso) : 0;
+            var pesoToneladas = peso / 1000;
+
+            var valorPorKgExcedente = pesoExcedente > 0 ? (valorExcedente / pesoExcedente) : 0;
+
+            var html = '<h3>📦 Como Calculei Esta Carga Fracionada - Passo a Passo</h3>';
+            html += '<div class="formula-box">';
+            html += '<strong>SEU CÁLCULO REAL: ' + peso + 'kg de ' + rota + ' com NF de R$ ' + valorNota.toFixed(2) + '</strong>';
+            html += '</div>';
+            html += '<h4>PASSO 1: Consultei a Tabela MAXLOG</h4>';
+            html += '<p>Na tabela oficial para <strong>' + rota + '</strong>:</p>';
+            html += '<div class="formula-box">';
+            html += '• Frete base (até 100kg): R$ ' + freteBase.toFixed(2) + '<br>';
+            if (valorPorKgExcedente > 0) {
+                html += '• Excedente por kg: R$ ' + valorPorKgExcedente.toFixed(2) + '<br>';
+            }
+            html += '• GRISS: 0,2% da NF<br>';
+            html += '• ADV: 0,3% da NF<br>';
+            html += '• Pedágio: R$ 3,50 por fração de 100kg<br>';
+            html += '• Despacho: R$ 25,00 fixo';
+            html += '</div>';
+            html += '<h4>PASSO 2: Calculei o Frete</h4>';
+            html += '<p><strong>2A)</strong> Frete Base (fixo até 100kg):</p>';
+            html += '<div class="formula-box">';
+            html += 'Frete Base = R$ ' + freteBase.toFixed(2) + ' (valor da tabela)';
+            html += '</div>';
+
+            if (pesoExcedente > 0) {
+                html += '<p><strong>2B)</strong> Calculei Excedente:</p>';
+                html += '<div class="formula-box">';
+                html += 'Peso excedente = ' + peso + 'kg - 100kg = ' + pesoExcedente.toFixed(1) + 'kg<br>';
+                html += 'Valor excedente = ' + pesoExcedente.toFixed(1) + 'kg × R$ ' + valorPorKgExcedente.toFixed(2) + ' = R$ ' + valorExcedente.toFixed(2);
+                html += '</div>';
+            } else {
+                html += '<p><strong>2B)</strong> Sem Excedente:</p>';
+                html += '<div class="formula-box">';
+                html += 'Peso ≤ 100kg, então não há excedente a calcular';
+                html += '</div>';
+            }
+
+            html += '<p><strong>2C)</strong> Subtotal do Frete:</p>';
+            html += '<div class="formula-box">';
+            html += 'Subtotal = R$ ' + freteBase.toFixed(2) + ' + R$ ' + valorExcedente.toFixed(2) + ' = R$ ' + (freteBase + valorExcedente).toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 3: Calculei Pedágio</h4>';
+            html += '<p>R$ 3,50 por fração de 100kg (sempre arredondar para CIMA):</p>';
+            html += '<div class="formula-box">';
+            html += peso + 'kg ÷ 100 = ' + (peso/100).toFixed(1) + ' frações<br>';
+            html += 'Arredondando para cima: ' + fracoesPedagio + ' frações<br>';
+            html += 'Pedágio = ' + fracoesPedagio + ' × R$ 3,50 = R$ ' + pedagio.toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 4: Calculei GRISS (0,2% da NF)</h4>';
+            html += '<div class="formula-box">';
+            html += 'GRISS = R$ ' + valorNota.toFixed(2) + ' × 0,2% = R$ ' + valorNota.toFixed(2) + ' × 0,002 = R$ ' + griss.toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 5: Calculei ADV (0,3% da NF)</h4>';
+            html += '<div class="formula-box">';
+            html += 'ADV = R$ ' + valorNota.toFixed(2) + ' × 0,3% = R$ ' + valorNota.toFixed(2) + ' × 0,003 = R$ ' + adv.toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 6: Taxa de Despacho</h4>';
+            html += '<div class="formula-box">';
+            html += 'Despacho = R$ ' + despacho.toFixed(2) + ' (valor fixo da tabela)';
+            html += '</div>';
+            html += '<h4>PASSO 7: RESULTADO FINAL</h4>';
+            html += '<div class="formula-box" style="background-color: #fff3cd; border-color: #ffc107; color: #856404;">';
+            html += '<strong>COMO CHEGUEI NO VALOR:</strong><br>';
+            html += 'Subtotal Frete: R$ ' + (freteBase + valorExcedente).toFixed(2) + '<br>';
+            html += '+ Pedágio: R$ ' + pedagio.toFixed(2) + '<br>';
+            html += '+ GRISS: R$ ' + griss.toFixed(2) + '<br>';
+            html += '+ ADV: R$ ' + adv.toFixed(2) + '<br>';
+            html += '+ Despacho: R$ ' + despacho.toFixed(2) + '<br>';
+            html += '═══════════════════════════<br>';
+            html += '<strong>TOTAL: R$ ' + totalGeral.toFixed(2) + '</strong><br>';
+            html += '<strong>Preço por kg: R$ ' + totalGeral.toFixed(2) + ' ÷ ' + peso + 'kg = R$ ' + precoKg.toFixed(4) + '/kg</strong>';
+            html += '</div>';
+            html += '<h4>⚙️ VALOR DO FRETE ÔMEGA - PARA QUE SERVE?</h4>';
+            html += '<div class="warning-box">';
+            html += '<p><strong>O sistema Ômega calcula frete por TONELADA, não por valor total.</strong></p>';
+            html += '<p>Por isso precisa inserir o "Valor do Frete Ômega" que é:</p>';
+            html += '<div class="formula-box" style="background: #fbbf24; color: white;">';
+            html += '<strong>Frete Ômega = Frete Total ÷ Peso em Toneladas</strong><br>';
+            html += 'R$ ' + totalGeral.toFixed(2) + ' ÷ ' + pesoToneladas.toFixed(3) + 't = <strong>R$ ' + valorOmega.toFixed(2) + '/ton</strong>';
+            html += '</div>';
+            html += '<p><strong>Este é o valor que você deve inserir no sistema Ômega!</strong></p>';
+            html += '</div>';
+            html += '<h4>RESUMO DA FÓRMULA USADA:</h4>';
+            html += '<div class="formula-box">';
+            html += '<strong>R$ ' + totalGeral.toFixed(2) + ' = (R$ ' + freteBase.toFixed(2) + ' + R$ ' + valorExcedente.toFixed(2) + ') + R$ ' + pedagio.toFixed(2) + ' + R$ ' + griss.toFixed(2) + ' + R$ ' + adv.toFixed(2) + ' + R$ ' + despacho.toFixed(2) + '</strong>';
+            html += '</div>';
+
+            document.getElementById('fracionadaMethodology').innerHTML = html;
+        }
+
+        function atualizarMetodologiaLotacao(dados) {
+            var valorNota = dados.valorNota || 0;
+            var rota = dados.rota || '';
+            var totalGeral = dados.totalGeral || 0;
+            var peso = dados.peso || '';
+            var valorOmega = dados.valorOmega || 0;
+            
+            var pesoNumerico = 32000;
+            if (peso.indexOf('25') > -1) pesoNumerico = 25000;
+            else if (peso.indexOf('13') > -1) pesoNumerico = 13000;
+            
+            var griss = valorNota * 0.001;
+            var adv = valorNota * 0.0015;
+            var valorVeiculo = totalGeral - griss - adv;
+            var precoKg = totalGeral / pesoNumerico;
+            var pesoToneladas = pesoNumerico / 1000;
+
+            var tipoVeiculo = 'Carreta 32 ton';
+            if (peso.indexOf('25') > -1) tipoVeiculo = 'Carreta 25 ton';
+            else if (peso.indexOf('13') > -1) tipoVeiculo = 'Truck 13 ton';
+
+            var html = '<h3>🚚 Como Calculei Esta Carga Lotação - Passo a Passo</h3>';
+            html += '<div class="formula-box">';
+            html += '<strong>SEU CÁLCULO REAL: ' + tipoVeiculo + ' de ' + rota + ' com NF de R$ ' + valorNota.toFixed(2) + '</strong>';
+            html += '</div>';
+            html += '<h4>PASSO 1: Consultei Tabela MAXLOG para Lotação</h4>';
+            html += '<p>Na tabela oficial para <strong>' + rota + '</strong> em lotação:</p>';
+            html += '<div class="formula-box">';
+            html += tipoVeiculo + ': R$ ' + valorVeiculo.toFixed(2) + '<br>';
+            html += '• GRISS: 0,1% da NF (menor que fracionada)<br>';
+            html += '• ADV: 0,15% da NF (menor que fracionada)<br>';
+            html += '• SEM pedágio e SEM despacho na lotação';
+            html += '</div>';
+            html += '<h4>PASSO 2: Valor do Veículo</h4>';
+            html += '<div class="formula-box">';
+            html += tipoVeiculo + ' = R$ ' + valorVeiculo.toFixed(2) + ' (valor fixo da tabela)';
+            html += '</div>';
+            html += '<h4>PASSO 3: Calculei GRISS (0,1% da NF)</h4>';
+            html += '<div class="formula-box">';
+            html += 'GRISS = R$ ' + valorNota.toFixed(2) + ' × 0,1% = R$ ' + valorNota.toFixed(2) + ' × 0,001 = R$ ' + griss.toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 4: Calculei ADV (0,15% da NF)</h4>';
+            html += '<div class="formula-box">';
+            html += 'ADV = R$ ' + valorNota.toFixed(2) + ' × 0,15% = R$ ' + valorNota.toFixed(2) + ' × 0,0015 = R$ ' + adv.toFixed(2);
+            html += '</div>';
+            html += '<h4>PASSO 5: RESULTADO FINAL</h4>';
+            html += '<div class="formula-box" style="background-color: #fff3cd; border-color: #ffc107; color: #856404;">';
+            html += '<strong>COMO CHEGUEI NO VALOR:</strong><br>';
+            html += tipoVeiculo + ': R$ ' + valorVeiculo.toFixed(2) + '<br>';
+            html += '+ GRISS: R$ ' + griss.toFixed(2) + '<br>';
+            html += '+ ADV: R$ ' + adv.toFixed(2) + '<br>';
+            html += '═══════════════════════════<br>';
+            html += '<strong>TOTAL: R$ ' + totalGeral.toFixed(2) + '</strong><br>';
+            html += '<strong>Preço por kg: R$ ' + totalGeral.toFixed(2) + ' ÷ ' + pesoNumerico.toLocaleString() + 'kg = R$ ' + precoKg.toFixed(4) + '/kg</strong>';
+            html += '</div>';
+            html += '<h4>⚙️ VALOR DO FRETE ÔMEGA - PARA QUE SERVE?</h4>';
+            html += '<div class="warning-box">';
+            html += '<p><strong>O sistema Ômega calcula frete por TONELADA, não por valor total.</strong></p>';
+            html += '<p>Para lotação, use a capacidade do veículo como base:</p>';
+            html += '<div class="formula-box" style="background: #fbbf24; color: white;">';
+            html += '<strong>Frete Ômega = Frete Total ÷ Toneladas do Veículo</strong><br>';
+            html += 'R$ ' + totalGeral.toFixed(2) + ' ÷ ' + pesoToneladas + 't = <strong>R$ ' + valorOmega.toFixed(2) + '/ton</strong>';
+            html += '</div>';
+            html += '<p><strong>Este é o valor que você deve inserir no sistema Ômega!</strong></p>';
+            html += '</div>';
+            html += '<h4>RESUMO DA FÓRMULA USADA:</h4>';
+            html += '<div class="formula-box">';
+            html += '<strong>R$ ' + totalGeral.toFixed(2) + ' = R$ ' + valorVeiculo.toFixed(2) + ' + R$ ' + griss.toFixed(2) + ' + R$ ' + adv.toFixed(2) + '</strong>';
+            html += '</div>';
+            html += '<h4>DIFERENÇAS DA LOTAÇÃO vs FRACIONADA:</h4>';
+            html += '<div class="warning-box">';
+            html += '<ul>';
+            html += '<li><strong>GRISS:</strong> 0,1% (lotação) vs 0,2% (fracionada)</li>';
+            html += '<li><strong>ADV:</strong> 0,15% (lotação) vs 0,3% (fracionada)</li>';
+            html += '<li><strong>SEM pedágio:</strong> Lotação não cobra R$ 3,50 por fração</li>';
+            html += '<li><strong>SEM despacho:</strong> Lotação não cobra R$ 25,00</li>';
+            html += '<li><strong>Preço fixo:</strong> Não importa o peso real da carga</li>';
+            html += '</ul>';
+            html += '</div>';
+
+            document.getElementById('lotacaoMethodology').innerHTML = html;
+        }
+
+        function fecharModal() {
+            var modal = document.getElementById('methodologyModal');
+            modal.classList.remove('show');
+        }
+
+        window.addEventListener('click', function(event) {
+            var modal = document.getElementById('methodologyModal');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModal();
+            }
+        });
+    </script>
+</body>
+</html>
