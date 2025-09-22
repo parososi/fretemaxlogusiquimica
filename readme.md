@@ -1,4 +1,4 @@
-# 🚛 Calculadora de Frete MAXLOG / GUARULHOS-SP - Usiquímica
+# 🚛 Calculadora de Frete MAXLOG / ITAJAÍ-SC - Usiquímica
 
 Uma calculadora web interativa para cotação de fretes da transportadora MAXLOG, desenvolvida especificamente para o uso limitado a Usiquímica do Brasil. A ferramenta automatiza o cálculo de fretes fracionados e lotação com base na tabela oficial da transportadora.
 
@@ -58,7 +58,7 @@ Esta calculadora foi desenvolvida para automatizar e padronizar os cálculos de 
 - **Lotação**: Para veículos completos
 
 ### 2. Configurar Origem/Destino
-- **Origem**: Guarulhos/SP (fixo)
+- **Origem**: Itajaí/SC (fixo)
 - **Destino**: Selecionar da lista disponível
 
 ### 3. Adicionar Produtos (Fracionada)
